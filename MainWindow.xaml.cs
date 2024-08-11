@@ -20,5 +20,9 @@ namespace SQLMultiagent
         {
             InitializeComponent();
         }
+        private async void AskButton_Click(object sender, RoutedEventArgs e)
+        {
+            //await multiAgent.askQuestion();
+        }
     }
 }

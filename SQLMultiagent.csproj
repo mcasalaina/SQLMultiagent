@@ -8,4 +8,22 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="TestSQLMultiagent\**" />
+    <EmbeddedResource Remove="TestSQLMultiagent\**" />
+    <None Remove="TestSQLMultiagent\**" />
+    <Page Remove="TestSQLMultiagent\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.AI.OpenAI" Version="2.0.0-beta.2" />
+    <PackageReference Include="Azure.Core" Version="1.41.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.1" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.16.0" />
+    <PackageReference Include="Microsoft.SemanticKernel.Agents.Core" Version="1.16.0-alpha" />
+    <PackageReference Include="Microsoft.SemanticKernel.Agents.OpenAI" Version="1.16.0-alpha" />
+    <PackageReference Include="Microsoft.SemanticKernel.Connectors.OpenAI" Version="1.16.0" />
+    <PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.16.0" />
+  </ItemGroup>
+
 </Project>
