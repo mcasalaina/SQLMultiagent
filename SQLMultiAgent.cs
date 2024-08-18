@@ -102,6 +102,102 @@ namespace SQLMultiagent
             return builder.Build();
         }
 
+        /// <summary>
+        /// Asks the question with a semi-deterministic pattern, first asking the SQL Assistant as a singleton agent,
+        /// then running the query and the answer by the checker multiagent system, which can approve or reject the answer.
+        /// A rejection triggers a rewrite cycle.
+        /// </summary>
+        /// <returns></returns>
+        public async Task askQuestionSemiDeterministic()
+        {
+            await askQuestionSingletonAgent();
+
+            //Make a prompt for the multiagent that contains the SQL query and the response from the SQL query
+            QueryCheckerPrompt = $"""
+                You are an agent that checks queries on the {Context} database to ensure 
+                that they are correct and consistent with what the user requested.
+                The user's natural language question has been converted by a different agent 
+                into a SQL query that retrieves the answer from the {Context} database.
+
+                The user's request was:
+                {question}
+
+                The SQL query the other agent generated is: 
+                {sqlQuery}
+
+                The response is: 
+                {queryResponse}
+
+                If this query is consistent with the user's response, you approve the query by replying only "Approve" with no further text.
+
+                If the query is incorrect, you reject the query by replying "Reject - " with text indicating the reason for rejection.
+            """;
+
+            ChatCompletionAgent queryCheckerAgent =
+            new()
+            {
+                Instructions = QueryCheckerPrompt,
+                Name = "QueryCheckerAgent",
+                Kernel = this.CreateKernelWithChatCompletion(true),
+                Arguments = this.MakeKernelArguments()
+            };
+
+            ChatCompletionAgent managerAgent =
+                new()
+                {
+                    Instructions = ManagerPrompt,
+                    Name = "ManagerAgent",
+                    Kernel = this.CreateKernelWithChatCompletion(true),
+                    Arguments = MakeKernelArguments()
+                };
+
+            ChatCompletionAgent explainerAgent =
+                new()
+                {
+                    Instructions = ExplainerPrompt,
+                    Name = "ExplainerAgent",
+                    Kernel = this.CreateKernelWithChatCompletion(true),
+                    Arguments = MakeKernelArguments()
+                };
+
+            // Create a chat for agent interaction.
+            AgentGroupChat chat =
+                new(queryCheckerAgent, explainerAgent, managerAgent)
+                {
+                    ExecutionSettings =
+                        new()
+                        {
+                            // Here a TerminationStrategy subclass is used that will terminate when
+                            // an assistant message contains the term "approve".
+                            TerminationStrategy =
+                                new ApprovalTerminationStrategy()
+                                {
+                                    // Only the manager may approve.
+                                    Agents = [managerAgent],
+                                    // Limit total number of turns
+                                    MaximumIterations = 10,
+                                }
+                        }
+                };
+
+            // Invoke chat and display messages.
+            chat.AddChatMessage(new ChatMessageContent(AuthorRole.User, question));
+            Console.WriteLine($"# {AuthorRole.User}: '{question}'");
+
+            StringWriter queryResponseWriter = new StringWriter();
+
+            await foreach (ChatMessageContent content in chat.InvokeAsync())
+            {
+                string output = $"# {content.Role} - {content.AuthorName ?? "*"}: '{content.Content}'";
+                Console.WriteLine(output);
+                queryResponseWriter.WriteLine(output);
+            }
+
+            Console.WriteLine($"# IS COMPLETE: {chat.IsComplete}");
+
+            queryResponse = queryResponseWriter.ToString();
+        }
+
         //Asks the question using the four agents, including the SQL Assistant, with the SQLServerPlugin as a tool
         public async Task askQuestionMultiAgent()
         {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Formats.Asn1;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -48,6 +49,19 @@ namespace TestSQLMultiagent
             SQLMultiAgent agent = new SQLMultiAgent();
             agent.question = "What salesperson sold the most of my best-selling product?";
             await agent.askQuestionMultiAgent();
+
+            Assert.IsNotNull(agent.sqlQuery);
+            Assert.IsNotEmpty(agent.sqlQuery);
+
+            Assert.IsNotEmpty(agent.queryResponse);
+        }
+
+        [Test]
+        public static async Task TestAskQuestionSemiDeterministic()
+        {
+            SQLMultiAgent agent = new SQLMultiAgent();
+            agent.question = "What was my best selling product?";
+            await agent.askQuestionSemiDeterministic();
 
             Assert.IsNotNull(agent.sqlQuery);
             Assert.IsNotEmpty(agent.sqlQuery);
