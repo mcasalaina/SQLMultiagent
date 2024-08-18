@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.SemanticKernel.Agents.OpenAI;
 using NUnit.Framework;
 using SQLMultiagent;
 
@@ -26,6 +27,32 @@ namespace TestSQLMultiagent
 
             //Assert that the result contains the word "Adjustable"
             Assert.IsTrue(result.Contains("Adjustable"));
+        }
+
+        [Test]
+        public static async Task TestAskQuestion()
+        {
+            SQLMultiAgent agent = new SQLMultiAgent();
+            agent.question = "What was my best selling product?";
+            await agent.askQuestionSingletonAgent();
+
+            Assert.IsNotNull(agent.sqlQuery);
+            Assert.IsNotEmpty(agent.sqlQuery);
+
+            Assert.IsNotEmpty(agent.queryResponse);
+        }
+
+        [Test]
+        public static async Task TestAskQuestionWithParameters()
+        {
+            SQLMultiAgent agent = new SQLMultiAgent();
+            agent.question = "What salesperson sold the most of my best-selling product?";
+            await agent.askQuestionMultiAgent();
+
+            Assert.IsNotNull(agent.sqlQuery);
+            Assert.IsNotEmpty(agent.sqlQuery);
+
+            Assert.IsNotEmpty(agent.queryResponse);
         }
     }
 }
