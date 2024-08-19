@@ -102,15 +102,16 @@ namespace SQLMultiagent
             return builder.Build();
         }
 
+
         /// <summary>
         /// Asks the question with a semi-deterministic pattern, first asking the SQL Assistant as a singleton agent,
         /// then running the query and the answer by the checker multiagent system, which can approve or reject the answer.
         /// A rejection triggers a rewrite cycle.
         /// </summary>
         /// <returns></returns>
-        public async Task askQuestionSemiDeterministic()
+        public async Task askSemiDeterministic()
         {
-            await askQuestionSingletonAgent();
+            await askSingletonAgent(false);
 
             //Make a prompt for the multiagent that contains the SQL query and the response from the SQL query
             QueryCheckerPrompt = $"""
@@ -167,15 +168,11 @@ namespace SQLMultiagent
                     ExecutionSettings =
                         new()
                         {
-                            // Here a TerminationStrategy subclass is used that will terminate when
-                            // an assistant message contains the term "approve".
+                            // Here a TerminationStrategy subclass is used that will just terminate when the manager comes up.
                             TerminationStrategy =
-                                new ApprovalTerminationStrategy()
+                                new SequentialTerminationStrategy()
                                 {
-                                    // Only the manager may approve.
                                     Agents = [managerAgent],
-                                    // Limit total number of turns
-                                    MaximumIterations = 10,
                                 }
                         }
                 };
@@ -199,7 +196,7 @@ namespace SQLMultiagent
         }
 
         //Asks the question using the four agents, including the SQL Assistant, with the SQLServerPlugin as a tool
-        public async Task askQuestionMultiAgent()
+        public async Task askMultiagent()
         {
             IKernelBuilder builder = Kernel.CreateBuilder();
             Kernel kernel = builder.AddAzureOpenAIChatCompletion(
@@ -296,7 +293,7 @@ namespace SQLMultiagent
         }
 
         //Asks the question using only the singleton Assistant and then runs the SQL query directly with no further interaction
-        public async Task askQuestionSingletonAgent()
+        public async Task askSingletonAgent(bool withFunctions)
         {
             IKernelBuilder builder = Kernel.CreateBuilder();
             Kernel kernel = builder.AddAzureOpenAIChatCompletion(
@@ -304,6 +301,11 @@ namespace SQLMultiagent
                             endpoint: ENDPOINT,
                             apiKey: API_KEY)
                         .Build();
+
+            if (withFunctions)
+            {
+                builder.Plugins.AddFromType<SQLServerPlugin>();
+            }
 
             OpenAIClientProvider provider = OpenAIClientProvider.ForAzureOpenAI(API_KEY, new Uri(ENDPOINT));
 
@@ -330,15 +332,16 @@ namespace SQLMultiagent
                 jsonResponse += content.Content;
             }
 
-            // Inside the askQuestion method, replace the problematic line with:
-            using (JsonDocument jsonDoc = JsonDocument.Parse(jsonResponse))
+            if (!withFunctions)
+                // Inside the askQuestion method, replace the problematic line with:
+                using (JsonDocument jsonDoc = JsonDocument.Parse(jsonResponse))
             {
                 sqlQuery = jsonDoc.RootElement.GetProperty("query").GetString();
-            }
 
-            //Run the SQL query in the variable called sqlQuery
-            SQLServerPlugin plugin = new SQLServerPlugin();
-            queryResponse = await plugin.ExecuteSqlQuery(sqlQuery);
+                //Run the SQL query in the variable called sqlQuery
+                SQLServerPlugin plugin = new SQLServerPlugin();
+                queryResponse = await plugin.ExecuteSqlQuery(sqlQuery);
+            }
 
             Console.WriteLine($"# {queryResponse}");
         }

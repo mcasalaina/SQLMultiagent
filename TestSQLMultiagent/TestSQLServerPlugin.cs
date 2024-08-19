@@ -12,6 +12,9 @@ namespace TestSQLMultiagent
 {
     internal class TestSQLServerPlugin
     {
+        private const string COMPLEX_QUERY_1 = "What salesperson sold the most of my best-selling product?";
+        private const string SIMPLE_QUERY_1 = "What was my best selling product?";
+
         //Declare this as a test
         [Test]
         public static async Task TestExecuteSqlQuery()
@@ -34,8 +37,34 @@ namespace TestSQLMultiagent
         public static async Task TestAskQuestion()
         {
             SQLMultiAgent agent = new SQLMultiAgent();
-            agent.question = "What was my best selling product?";
-            await agent.askQuestionSingletonAgent();
+            agent.question = SIMPLE_QUERY_1;
+            await agent.askSingletonAgent(false);
+
+            Assert.IsNotNull(agent.sqlQuery);
+            Assert.IsNotEmpty(agent.sqlQuery);
+
+            Assert.IsNotEmpty(agent.queryResponse);
+        }
+
+        [Test]
+        public static async Task TestAskSingletonWithFunctions()
+        {
+            SQLMultiAgent agent = new SQLMultiAgent();
+            agent.question = SIMPLE_QUERY_1;
+            await agent.askSingletonAgent(true);
+
+            Assert.IsNotNull(agent.sqlQuery);
+            Assert.IsNotEmpty(agent.sqlQuery);
+
+            Assert.IsNotEmpty(agent.queryResponse);
+        }
+
+        [Test]
+        public static async Task TestAskSingletonWithFunctionsComplexQuery1()
+        {
+            SQLMultiAgent agent = new SQLMultiAgent();
+            agent.question = COMPLEX_QUERY_1;
+            await agent.askSingletonAgent(true);
 
             Assert.IsNotNull(agent.sqlQuery);
             Assert.IsNotEmpty(agent.sqlQuery);
@@ -47,8 +76,8 @@ namespace TestSQLMultiagent
         public static async Task TestAskQuestionWithParameters()
         {
             SQLMultiAgent agent = new SQLMultiAgent();
-            agent.question = "What salesperson sold the most of my best-selling product?";
-            await agent.askQuestionMultiAgent();
+            agent.question = COMPLEX_QUERY_1;
+            await agent.askMultiagent();
 
             Assert.IsNotNull(agent.sqlQuery);
             Assert.IsNotEmpty(agent.sqlQuery);
@@ -60,8 +89,8 @@ namespace TestSQLMultiagent
         public static async Task TestAskQuestionSemiDeterministic()
         {
             SQLMultiAgent agent = new SQLMultiAgent();
-            agent.question = "What was my best selling product?";
-            await agent.askQuestionSemiDeterministic();
+            agent.question = SIMPLE_QUERY_1;
+            await agent.askSemiDeterministic();
 
             Assert.IsNotNull(agent.sqlQuery);
             Assert.IsNotEmpty(agent.sqlQuery);
