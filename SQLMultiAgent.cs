@@ -81,6 +81,13 @@ namespace SQLMultiagent
             }
         }
 
+        public event EventHandler? AgentResponded;
+        public void EmitResponse(string agentName, string response)
+        {
+            Console.WriteLine($"Agent {agentName}: {response}");
+            AgentResponded?.Invoke(this, new AgentRespondedEventArgs(agentName,response));
+        }
+
         string? QueryWriterPrompt;
         string? QueryCheckerPrompt;
         string? ManagerPrompt;
@@ -292,7 +299,11 @@ namespace SQLMultiagent
             );
         }
 
-        //Asks the question using only the singleton Assistant and then runs the SQL query directly with no further interaction
+        /// <summary>
+        /// Asks the question using only the singleton Assistant and then runs the SQL query directly with no further interaction
+        /// </summary>
+        /// <param name="withFunctions">True if it should enable the SQL query runner as a function, or false to deterministically run the SQL query</param>
+        /// <returns>A Task object, as this runs asynchronously.</returns>
         public async Task askSingletonAgent(bool withFunctions)
         {
             IKernelBuilder builder = Kernel.CreateBuilder();
@@ -319,7 +330,7 @@ namespace SQLMultiagent
 
             await sqlAssistant.AddChatMessageAsync(threadId, new ChatMessageContent(AuthorRole.User, question));
 
-            Console.WriteLine($"# {AuthorRole.User}: '{question}'");
+            EmitResponse("User", question);
 
             string jsonResponse = "";
 
@@ -327,6 +338,7 @@ namespace SQLMultiagent
             {
                 if (content.Role != AuthorRole.Tool)
                 {
+                    EmitResponse(content.AuthorName, content.Content);
                     Console.WriteLine($"# {content.Role} - {content.AuthorName ?? "*"}: '{content.Content}'");
                 }
                 jsonResponse += content.Content;
@@ -343,7 +355,7 @@ namespace SQLMultiagent
                 queryResponse = await plugin.ExecuteSqlQuery(sqlQuery);
             }
 
-            Console.WriteLine($"# {queryResponse}");
+            EmitResponse("Query Runner", queryResponse);
         }
 
         public void updatePrompts()
