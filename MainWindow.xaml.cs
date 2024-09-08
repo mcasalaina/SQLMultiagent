@@ -24,6 +24,7 @@ namespace SQLMultiAgent
             InitializeComponent();
             multiAgent = new SQLMultiAgentRunner();
             this.DataContext = multiAgent;
+            multiAgent.AgentResponded += SQLMultiAgent_AgentResponded;
         }
         private async void AskButton_Click(object sender, RoutedEventArgs e)
         {
@@ -47,8 +48,6 @@ namespace SQLMultiAgent
 
         public async Task AskQuestion()
         {
-            multiAgent.AgentResponded += SQLMultiAgent_AgentResponded;
-
             //Clear out the response box
             ClearResponseBox();
 
@@ -57,7 +56,7 @@ namespace SQLMultiAgent
             if (AgentType.Text == "Single Agent")
             {
                 //Ask the question
-                await multiAgent.askSingletonAgent(false);
+                await multiAgent.AskSingletonAgent();
             } else if (AgentType.Text == "Single Agent with Functions")
             {
                 //Ask the question
@@ -66,12 +65,12 @@ namespace SQLMultiAgent
             else if (AgentType.Text == "Multiagent")
             {
                 //Ask the question
-                await multiAgent.askSemiDeterministic();
+                await multiAgent.AskSemiDeterministic();
             }
             else if (AgentType.Text == "Multiagent with Functions")
             {
                 //Ask the question
-                await multiAgent.askMultiagent();
+                await multiAgent.AskMultiagent();
             }
         }
 

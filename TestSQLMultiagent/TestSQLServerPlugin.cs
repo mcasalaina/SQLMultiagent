@@ -37,7 +37,7 @@ namespace TestSQLMultiagent
         {
             SQLMultiAgent.SQLMultiAgentRunner agent = new SQLMultiAgent.SQLMultiAgentRunner();
             agent.question = SIMPLE_QUERY_1;
-            await agent.askSingletonAgent(false);
+            await agent.AskSingletonAgent();
 
             Assert.IsNotNull(agent.sqlQuery);
             Assert.IsNotEmpty(agent.sqlQuery);
@@ -70,7 +70,7 @@ namespace TestSQLMultiagent
         {
             SQLMultiAgent.SQLMultiAgentRunner agent = new SQLMultiAgent.SQLMultiAgentRunner();
             agent.question = COMPLEX_QUERY_1;
-            await agent.askMultiagent();
+            await agent.AskMultiagent();
 
             Assert.IsNotNull(agent.sqlQuery);
             Assert.IsNotEmpty(agent.sqlQuery);
@@ -83,7 +83,7 @@ namespace TestSQLMultiagent
         {
             SQLMultiAgent.SQLMultiAgentRunner agent = new SQLMultiAgent.SQLMultiAgentRunner();
             agent.question = SIMPLE_QUERY_1;
-            await agent.askSemiDeterministic();
+            await agent.AskSemiDeterministic();
 
             Assert.IsNotNull(agent.sqlQuery);
             Assert.IsNotEmpty(agent.sqlQuery);

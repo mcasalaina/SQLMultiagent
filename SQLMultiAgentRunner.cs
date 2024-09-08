@@ -15,6 +15,7 @@ using Microsoft.SemanticKernel.ChatCompletion;
 using System.Reflection.Metadata;
 using System.Text.Json;
 using System.IO;
+using System.Diagnostics.Eventing.Reader;
 
 #pragma warning disable SKEXP0110, SKEXP0001, SKEXP0050, CS8600, CS8604
 
@@ -76,7 +77,7 @@ namespace SQLMultiAgent
                 if (_queryResponse != value)
                 {
                     _queryResponse = value;
-                    OnPropertyChanged("QueryResponse");
+                    //OnPropertyChanged("QueryResponse");
                 }
             }
         }
@@ -90,6 +91,29 @@ namespace SQLMultiAgent
             queryResponse += formattedResponse + "\n";
 
             AgentResponded?.Invoke(this, new AgentRespondedEventArgs(agentName,response));
+        }
+
+        public void EmitResponse(ChatMessageContent content)
+        {
+            string contentRole="";
+            if (content.Role == AuthorRole.Tool)
+            {
+                contentRole = "Tool";
+            }
+            else if (content.Role == AuthorRole.Assistant) 
+            { 
+                contentRole = "Assistant";
+            } 
+            else if (content.Role == AuthorRole.User)
+            {
+                contentRole = "User";
+            }
+            else
+            {
+                contentRole = "Agent";
+            }
+            
+            EmitResponse(contentRole,content.Content);
         }
 
         string? QueryWriterPrompt;
@@ -120,9 +144,9 @@ namespace SQLMultiAgent
         /// A rejection triggers a rewrite cycle.
         /// </summary>
         /// <returns></returns>
-        public async Task askSemiDeterministic()
+        public async Task AskSemiDeterministic()
         {
-            await askSingletonAgent(false);
+            await AskSingletonAgent();
 
             //Make a prompt for the multiagent that contains the SQL query and the response from the SQL query
             QueryCheckerPrompt = $"""
@@ -207,7 +231,7 @@ namespace SQLMultiAgent
         }
 
         //Asks the question using the four agents, including the SQL Assistant, with the SQLServerPlugin as a tool
-        public async Task askMultiagent()
+        public async Task AskMultiagent()
         {
             IKernelBuilder builder = Kernel.CreateBuilder();
             Kernel kernel = builder.AddAzureOpenAIChatCompletion(
@@ -342,11 +366,13 @@ namespace SQLMultiAgent
             {
                 ChatMessageContent message = new(AuthorRole.User, question);
                 await agent.AddChatMessageAsync(threadId, message);
-                EmitResponse("Assistant",message.Content);
+                if (message.Role != AuthorRole.User) { 
+                    EmitResponse(message);
+                }   
 
                 await foreach (ChatMessageContent response in agent.InvokeAsync(threadId))
                 {
-                    EmitResponse("Assistant", response.Content);
+                    EmitResponse(response);
                 }
             }
             finally
@@ -359,9 +385,8 @@ namespace SQLMultiAgent
         /// <summary>
         /// Asks the question using only the singleton Assistant and then runs the SQL query directly with no further interaction
         /// </summary>
-        /// <param name="withFunctions">True if it should enable the SQL query runner as a function, or false to deterministically run the SQL query</param>
         /// <returns>A Task object, as this runs asynchronously.</returns>
-        public async Task askSingletonAgent(bool withFunctions)
+        public async Task AskSingletonAgent()
         {
             EmitResponse("User", question);
 
@@ -371,7 +396,6 @@ namespace SQLMultiAgent
                             endpoint: ENDPOINT,
                             apiKey: API_KEY)
                         .Build();
-
             
 
             OpenAIClientProvider provider = OpenAIClientProvider.ForAzureOpenAI(API_KEY, new Uri(ENDPOINT));
@@ -380,12 +404,6 @@ namespace SQLMultiAgent
                 kernel,
                 provider,
                 SQL_WRITER_ASSISTANT_ID);
-
-            if (withFunctions)
-            {
-                KernelPlugin plugin = KernelPluginFactory.CreateFromType<SQLServerPlugin>();
-                sqlAssistant.Kernel.Plugins.Add(plugin);
-            }
 
             // Create a thread for the agent interaction.
             string threadId = await sqlAssistant.CreateThreadAsync();
@@ -404,9 +422,8 @@ namespace SQLMultiAgent
                 jsonResponse += content.Content;
             }
 
-            if (!withFunctions)
-                // Inside the askQuestion method, replace the problematic line with:
-                using (JsonDocument jsonDoc = JsonDocument.Parse(jsonResponse))
+            // Inside the askQuestion method, replace the problematic line with:
+            using (JsonDocument jsonDoc = JsonDocument.Parse(jsonResponse))
             {
                 sqlQuery = jsonDoc.RootElement.GetProperty("query").GetString();
 
