@@ -23,6 +23,7 @@ namespace SQLMultiAgent
 {
     public class SQLMultiAgentRunner
     {
+        private SynchronizationContext? context = SynchronizationContext.Current;
         public const string SQL_WRITER_ASSISTANT_ID = "asst_nbUQUshgy8xkhlVNJodYwp0w";
         string? DEPLOYMENT_NAME = Environment.GetEnvironmentVariable("AZURE_OPENAI_MODEL_DEPLOYMENT");
         string? ENDPOINT = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
@@ -90,7 +91,19 @@ namespace SQLMultiAgent
             //Add the formattedResponse to queryResponse with a newline
             queryResponse += formattedResponse + "\n";
 
-            AgentResponded?.Invoke(this, new AgentRespondedEventArgs(agentName,response));
+            //Painful crap you have to go through to send a message to the UI thread which might be coming from the function call thread
+            if (context != null)
+            {
+                context.Post(_ =>
+                {
+                    AgentResponded?.Invoke(this, new AgentRespondedEventArgs(agentName, response));
+                }, null);
+            }
+            else
+            {
+                AgentResponded?.Invoke(this, new AgentRespondedEventArgs(agentName, response));
+            }
+
         }
 
         public void EmitResponse(ChatMessageContent content)
@@ -356,7 +369,7 @@ namespace SQLMultiAgent
                     });
 
             // Initialize plugin and add to the agent's Kernel (same as direct Kernel usage).
-            KernelPlugin plugin = KernelPluginFactory.CreateFromType<SQLServerPlugin>();
+            KernelPlugin plugin = KernelPluginFactory.CreateFromObject(new SQLServerPlugin(this));
             agent.Kernel.Plugins.Add(plugin);
 
             // Create a thread for the agent conversation.
@@ -429,7 +442,7 @@ namespace SQLMultiAgent
                 sqlQuery = jsonDoc.RootElement.GetProperty("query").GetString();
 
                 //Run the SQL query in the variable called sqlQuery
-                SQLServerPlugin plugin = new SQLServerPlugin();
+                SQLServerPlugin plugin = new SQLServerPlugin(this);
                 queryResponse = await plugin.ExecuteSqlQuery(sqlQuery);
             }
 

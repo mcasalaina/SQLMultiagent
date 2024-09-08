@@ -18,7 +18,7 @@ namespace TestSQLMultiagent
         [Test]
         public static async Task TestExecuteSqlQuery()
         {
-            SQLServerPlugin plugin = new SQLServerPlugin();
+            SQLServerPlugin plugin = new SQLServerPlugin(new SQLMultiAgentRunner());
             string query = "SELECT TOP 10 * FROM Production.Product";
             string result = await plugin.ExecuteSqlQuery(query);
             Console.WriteLine(result);

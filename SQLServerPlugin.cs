@@ -8,7 +8,7 @@ namespace SQLMultiAgent
     public class SQLServerPlugin
     {
         private string _connectionString;
-        private SQLMultiAgentRunner? _multiAgent;
+        private SQLMultiAgentRunner _multiAgent;
 
         public string ConnectionString
         {
@@ -17,8 +17,9 @@ namespace SQLMultiAgent
         }
 
         //A constructor that takes in no arguments that sets the connection string to the database called AdventureWorks on SQL Server Express on localhost
-        public SQLServerPlugin()
+        public SQLServerPlugin(SQLMultiAgentRunner multiAgent)
         {
+            _multiAgent = multiAgent;
             _connectionString = "Server=localhost\\SQLEXPRESS;Database=AdventureWorks;Trusted_Connection=True;TrustServerCertificate=True;";
         }
 
@@ -74,7 +75,7 @@ namespace SQLMultiAgent
                                 result += Environment.NewLine;
                             }
 
-                            //_multiAgent.EmitResponse("SQL Runner", "Ran query " + query);
+                            _multiAgent.EmitResponse("SQL Runner", "Ran query " + query);
                             Console.WriteLine("Ran query " + query);
                             Console.WriteLine(result);
                             return result;
