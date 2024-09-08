@@ -18,10 +18,12 @@ namespace SQLMultiAgent
     {
         public const string DefaultQuestion = "What was my best selling product?";
 
-        private SQLMultiAgent? multiAgent;
+        private SQLMultiAgentRunner multiAgent;
         public MainWindow()
         {
             InitializeComponent();
+            multiAgent = new SQLMultiAgentRunner();
+            this.DataContext = multiAgent;
         }
         private async void AskButton_Click(object sender, RoutedEventArgs e)
         {
@@ -45,7 +47,6 @@ namespace SQLMultiAgent
 
         public async Task AskQuestion()
         {
-            multiAgent = new SQLMultiAgent();
             multiAgent.AgentResponded += SQLMultiAgent_AgentResponded;
 
             //Clear out the response box
@@ -60,7 +61,7 @@ namespace SQLMultiAgent
             } else if (AgentType.Text == "Single Agent with Functions")
             {
                 //Ask the question
-                await multiAgent.askSingletonAgent(true);
+                await multiAgent.AskSingletonAgentWithFunctions();
             }
             else if (AgentType.Text == "Multiagent")
             {

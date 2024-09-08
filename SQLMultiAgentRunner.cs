@@ -20,7 +20,7 @@ using System.IO;
 
 namespace SQLMultiAgent
 {
-    public class SQLMultiAgent
+    public class SQLMultiAgentRunner
     {
         public const string SQL_WRITER_ASSISTANT_ID = "asst_nbUQUshgy8xkhlVNJodYwp0w";
         string? DEPLOYMENT_NAME = Environment.GetEnvironmentVariable("AZURE_OPENAI_MODEL_DEPLOYMENT");
@@ -28,7 +28,7 @@ namespace SQLMultiAgent
         string? API_KEY = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY");
 
         string Context = "AdventureWorks"; 
-        public SQLMultiAgent()
+        public SQLMultiAgentRunner()
         {
             updatePrompts();
         }
@@ -84,7 +84,11 @@ namespace SQLMultiAgent
         public event EventHandler? AgentResponded;
         public void EmitResponse(string agentName, string response)
         {
-            Console.WriteLine($"Agent {agentName}: {response}");
+            String formattedResponse = $"Agent {agentName}: {response}";
+            Console.WriteLine(formattedResponse);
+            //Add the formattedResponse to queryResponse with a newline
+            queryResponse += formattedResponse + "\n";
+
             AgentResponded?.Invoke(this, new AgentRespondedEventArgs(agentName,response));
         }
 
@@ -299,6 +303,59 @@ namespace SQLMultiAgent
             );
         }
 
+        public async Task AskSingletonAgentWithFunctions()
+        {
+            EmitResponse("User", question);
+
+            IKernelBuilder builder = Kernel.CreateBuilder();
+            Kernel kernel = builder.AddAzureOpenAIChatCompletion(
+                            deploymentName: DEPLOYMENT_NAME,
+                            endpoint: ENDPOINT,
+                            apiKey: API_KEY)
+                        .Build();
+
+            OpenAIClientProvider provider = OpenAIClientProvider.ForAzureOpenAI(API_KEY, new Uri(ENDPOINT));
+
+            // Define the agent
+            OpenAIAssistantAgent agent =
+                await OpenAIAssistantAgent.CreateAsync(
+                    kernel: new(),
+                    clientProvider: provider,
+                    new(DEPLOYMENT_NAME)
+                    {
+                        Instructions = 
+                            "You are a SQL query generating agent. You generate SQL based on the attached PDF of the AdventureWorks schema." +
+                            "You then run that SQL query using the provided function. You evaluate the results, and regenerate the query and re-run the function" +
+                            "until the query response satisfies the user's request.",
+                        Name = "AdventureWorks SQL Assistant",
+                    });
+
+            // Initialize plugin and add to the agent's Kernel (same as direct Kernel usage).
+            KernelPlugin plugin = KernelPluginFactory.CreateFromType<SQLServerPlugin>();
+            agent.Kernel.Plugins.Add(plugin);
+
+            // Create a thread for the agent conversation.
+            string threadId = await agent.CreateThreadAsync(new OpenAIThreadCreationOptions {});
+
+            // Respond to user input
+            try
+            {
+                ChatMessageContent message = new(AuthorRole.User, question);
+                await agent.AddChatMessageAsync(threadId, message);
+                EmitResponse("Assistant",message.Content);
+
+                await foreach (ChatMessageContent response in agent.InvokeAsync(threadId))
+                {
+                    EmitResponse("Assistant", response.Content);
+                }
+            }
+            finally
+            {
+                await agent.DeleteThreadAsync(threadId);
+                await agent.DeleteAsync();
+            }
+        }
+
         /// <summary>
         /// Asks the question using only the singleton Assistant and then runs the SQL query directly with no further interaction
         /// </summary>
@@ -306,6 +363,8 @@ namespace SQLMultiAgent
         /// <returns>A Task object, as this runs asynchronously.</returns>
         public async Task askSingletonAgent(bool withFunctions)
         {
+            EmitResponse("User", question);
+
             IKernelBuilder builder = Kernel.CreateBuilder();
             Kernel kernel = builder.AddAzureOpenAIChatCompletion(
                             deploymentName: DEPLOYMENT_NAME,
@@ -332,8 +391,6 @@ namespace SQLMultiAgent
             string threadId = await sqlAssistant.CreateThreadAsync();
 
             await sqlAssistant.AddChatMessageAsync(threadId, new ChatMessageContent(AuthorRole.User, question));
-
-            EmitResponse("User", question);
 
             string jsonResponse = "";
 

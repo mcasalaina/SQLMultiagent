@@ -8,7 +8,7 @@ namespace SQLMultiAgent
     public class SQLServerPlugin
     {
         private string _connectionString;
-        private SQLMultiAgent? _multiAgent;
+        private SQLMultiAgentRunner? _multiAgent;
 
         public string ConnectionString
         {
