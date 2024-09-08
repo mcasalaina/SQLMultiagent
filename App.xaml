@@ -1,7 +1,7 @@
-﻿<Application x:Class="SQLMultiagent.App"
+﻿<Application x:Class="SQLMultiAgent.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:SQLMultiagent"
+             xmlns:local="clr-namespace:SQLMultiAgent"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
          

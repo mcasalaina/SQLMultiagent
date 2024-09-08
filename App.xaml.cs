@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace SQLMultiagent
+namespace SQLMultiAgent
 {
     /// <summary>
     /// Interaction logic for App.xaml

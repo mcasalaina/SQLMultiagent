@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SQLMultiagent
+namespace SQLMultiAgent
 {
     /// <summary>
     /// Event arguments for when an agent has responded.

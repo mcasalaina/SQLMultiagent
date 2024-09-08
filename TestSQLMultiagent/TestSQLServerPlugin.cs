@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.SemanticKernel.Agents.OpenAI;
 using NUnit.Framework;
-using SQLMultiagent;
+using SQLMultiAgent;
 
 namespace TestSQLMultiagent
 {
@@ -15,7 +15,6 @@ namespace TestSQLMultiagent
         private const string COMPLEX_QUERY_1 = "What salesperson sold the most of my best-selling product?";
         private const string SIMPLE_QUERY_1 = "What was my best selling product?";
 
-        //Declare this as a test
         [Test]
         public static async Task TestExecuteSqlQuery()
         {
@@ -36,7 +35,7 @@ namespace TestSQLMultiagent
         [Test]
         public static async Task TestAskQuestion()
         {
-            SQLMultiAgent agent = new SQLMultiAgent();
+            SQLMultiAgent.SQLMultiAgent agent = new SQLMultiAgent.SQLMultiAgent();
             agent.question = SIMPLE_QUERY_1;
             await agent.askSingletonAgent(false);
 
@@ -49,7 +48,7 @@ namespace TestSQLMultiagent
         [Test]
         public static async Task TestAskSingletonWithFunctions()
         {
-            SQLMultiAgent agent = new SQLMultiAgent();
+            SQLMultiAgent.SQLMultiAgent agent = new SQLMultiAgent.SQLMultiAgent();
             agent.question = SIMPLE_QUERY_1;
             await agent.askSingletonAgent(true);
 
@@ -62,7 +61,7 @@ namespace TestSQLMultiagent
         [Test]
         public static async Task TestAskSingletonWithFunctionsComplexQuery1()
         {
-            SQLMultiAgent agent = new SQLMultiAgent();
+            SQLMultiAgent.SQLMultiAgent agent = new SQLMultiAgent.SQLMultiAgent();
             agent.question = COMPLEX_QUERY_1;
             await agent.askSingletonAgent(true);
 
@@ -75,7 +74,7 @@ namespace TestSQLMultiagent
         [Test]
         public static async Task TestAskQuestionWithParameters()
         {
-            SQLMultiAgent agent = new SQLMultiAgent();
+            SQLMultiAgent.SQLMultiAgent agent = new SQLMultiAgent.SQLMultiAgent();
             agent.question = COMPLEX_QUERY_1;
             await agent.askMultiagent();
 
@@ -88,7 +87,7 @@ namespace TestSQLMultiagent
         [Test]
         public static async Task TestAskQuestionSemiDeterministic()
         {
-            SQLMultiAgent agent = new SQLMultiAgent();
+            SQLMultiAgent.SQLMultiAgent agent = new SQLMultiAgent.SQLMultiAgent();
             agent.question = SIMPLE_QUERY_1;
             await agent.askSemiDeterministic();
 

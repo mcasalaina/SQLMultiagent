@@ -18,7 +18,7 @@ using System.IO;
 
 #pragma warning disable SKEXP0110, SKEXP0001, SKEXP0050, CS8600, CS8604
 
-namespace SQLMultiagent
+namespace SQLMultiAgent
 {
     public class SQLMultiAgent
     {
@@ -313,10 +313,7 @@ namespace SQLMultiagent
                             apiKey: API_KEY)
                         .Build();
 
-            if (withFunctions)
-            {
-                builder.Plugins.AddFromType<SQLServerPlugin>();
-            }
+            
 
             OpenAIClientProvider provider = OpenAIClientProvider.ForAzureOpenAI(API_KEY, new Uri(ENDPOINT));
 
@@ -324,6 +321,12 @@ namespace SQLMultiagent
                 kernel,
                 provider,
                 SQL_WRITER_ASSISTANT_ID);
+
+            if (withFunctions)
+            {
+                KernelPlugin plugin = KernelPluginFactory.CreateFromType<SQLServerPlugin>();
+                sqlAssistant.Kernel.Plugins.Add(plugin);
+            }
 
             // Create a thread for the agent interaction.
             string threadId = await sqlAssistant.CreateThreadAsync();

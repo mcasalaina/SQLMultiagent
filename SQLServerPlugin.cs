@@ -3,15 +3,17 @@ using System.ComponentModel;
 using Microsoft.Data.SqlClient;
 using Microsoft.SemanticKernel;
 
-namespace SQLMultiagent
+namespace SQLMultiAgent
 {
     public class SQLServerPlugin
     {
-        private readonly string _connectionString;
+        private string _connectionString;
+        private SQLMultiAgent? _multiAgent;
 
-        public SQLServerPlugin(string connectionString)
+        public string ConnectionString
         {
-            _connectionString = connectionString;
+            get { return _connectionString; }
+            set { _connectionString = value; }
         }
 
         //A constructor that takes in no arguments that sets the connection string to the database called AdventureWorks on SQL Server Express on localhost
@@ -20,9 +22,37 @@ namespace SQLMultiagent
             _connectionString = "Server=localhost\\SQLEXPRESS;Database=AdventureWorks;Trusted_Connection=True;TrustServerCertificate=True;";
         }
 
-        [KernelFunction("ExecuteSqlQuery")]
+        public string executeSqlQuerySchema = @"
+        {
+          ""$schema"": ""http://json-schema.org/draft-07/schema#"",
+          ""title"": ""AssistantExecuteSqlQuery"",
+          ""description"": ""Executes a SQL query on the attached database."",
+          ""type"": ""object"",
+          ""properties"": {
+            ""query"": {
+              ""type"": ""string"",
+              ""description"": ""The SQL query to execute""
+            }
+          },
+          ""required"": [""query""],
+         ""additionalProperties"": false
+        }";
+
+        /// <summary>
+        /// An SK function for an Assistant that executes a SQL query on the attached database.
+        /// 
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        [KernelFunction("AssistantExecuteSqlQuery")]
         [Description("Executes a SQL query on the attached database.")]
         [return: Description("The result of the SQL query")]
+        public string AssistantExecuteSqlQuery(string query)
+        {
+            return ExecuteSqlQuery(query).Result;
+        }
+
+        
         public async Task<string> ExecuteSqlQuery(string query)
         {
             try
@@ -43,6 +73,10 @@ namespace SQLMultiagent
                                 }
                                 result += Environment.NewLine;
                             }
+
+                            //_multiAgent.EmitResponse("SQL Runner", "Ran query " + query);
+                            Console.WriteLine("Ran query " + query);
+                            Console.WriteLine(result);
                             return result;
                         }
                     }

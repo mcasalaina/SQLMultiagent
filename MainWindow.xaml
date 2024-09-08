@@ -1,9 +1,9 @@
-﻿<Window x:Class="SQLMultiagent.MainWindow"
+﻿<Window x:Class="SQLMultiAgent.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SQLMultiagent"
+        xmlns:local="clr-namespace:SQLMultiAgent"
         mc:Ignorable="d"
         Title="SQL Multiagent" Height="450" Width="800" WindowState="Maximized" Background="#FFF6F6F6">
     <Grid>
@@ -20,10 +20,19 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <TextBlock Text="Question:" KeyDown="QuestionBox_KeyDown" Grid.Column="0" Grid.Row="0" Margin="10,10,10,5" FontFamily="Arial" FontSize="14" FontWeight="Bold"/>
-        <TextBox x:Name="QueryBox" Grid.Column="0" Grid.Row="1" Margin="10" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" TextWrapping="Wrap" AcceptsReturn="True" TextBlock.FontFamily="Arial" TextBlock.FontSize="14"/>
-        <Button Content="Ask!" Grid.Column="0" Grid.Row="2" Margin="10" Click="AskButton_Click"/>
+        <TextBlock Text="Question:" Grid.Column="0" Grid.Row="0" Margin="10,10,10,5" FontFamily="Arial" FontSize="14" FontWeight="Bold"/>
+        <TextBox x:Name="QueryBox" KeyDown="QuestionBox_KeyDown" Grid.Column="0" Grid.Row="1" Margin="10" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" TextWrapping="Wrap" AcceptsReturn="True" TextBlock.FontFamily="Arial" TextBlock.FontSize="14"/>
+        <TextBlock Text="Agent Type:" Grid.Column="0" Grid.Row="2" Margin="10,5,10,5" FontFamily="Arial" FontSize="14" FontWeight="Bold"/>
+        <ComboBox Name="AgentType" Grid.Column="0" Grid.Row="3" Margin="10" SelectedIndex="0">
+            <ComboBoxItem>Single Agent</ComboBoxItem>
+            <ComboBoxItem>Single Agent with Functions</ComboBoxItem>
+            <ComboBoxItem>Multiagent</ComboBoxItem>
+            <ComboBoxItem>Multiagent with Functions</ComboBoxItem>
+        </ComboBox>
+        <Button Content="Ask!" Grid.Column="0" Grid.Row="4" Margin="10" Click="AskButton_Click" FontSize="14" FontWeight="Bold"/>
         <TextBlock Text="Answer:" Grid.Column="1" Grid.Row="0" Margin="10,10,10,5" FontFamily="Arial" FontSize="14" FontWeight="Bold"/>
         <RichTextBox x:Name="ResponseBox" Grid.Column="1" Grid.Row="1" Margin="10" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" AcceptsReturn="True" Grid.RowSpan="7" TextBlock.FontFamily="Arial" TextBlock.FontSize="14"/>
     </Grid>

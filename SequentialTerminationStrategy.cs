@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 #pragma warning disable SKEXP0110, SKEXP0001, SKEXP0050, CS8600, CS8604
 
-namespace SQLMultiagent
+namespace SQLMultiAgent
 {
     class SequentialTerminationStrategy : TerminationStrategy
     {

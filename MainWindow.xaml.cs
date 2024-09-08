@@ -9,7 +9,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace SQLMultiagent
+namespace SQLMultiAgent
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -18,17 +18,14 @@ namespace SQLMultiagent
     {
         public const string DefaultQuestion = "What was my best selling product?";
 
-        private SQLMultiAgent multiAgent;
+        private SQLMultiAgent? multiAgent;
         public MainWindow()
         {
-            multiAgent = new SQLMultiAgent();
-            multiAgent.AgentResponded += SQLMultiAgent_AgentResponded;
             InitializeComponent();
         }
         private async void AskButton_Click(object sender, RoutedEventArgs e)
         {
-            
-            await multiAgent.askSingletonAgent(false);
+            await AskQuestion();
         }
 
         private void SQLMultiAgent_AgentResponded(object? sender, EventArgs e)
@@ -44,6 +41,43 @@ namespace SQLMultiagent
             {
                 AskButton_Click(sender, e);
             }
+        }
+
+        public async Task AskQuestion()
+        {
+            multiAgent = new SQLMultiAgent();
+            multiAgent.AgentResponded += SQLMultiAgent_AgentResponded;
+
+            //Clear out the response box
+            ClearResponseBox();
+
+            //Case statement on AgentType.Text
+      
+            if (AgentType.Text == "Single Agent")
+            {
+                //Ask the question
+                await multiAgent.askSingletonAgent(false);
+            } else if (AgentType.Text == "Single Agent with Functions")
+            {
+                //Ask the question
+                await multiAgent.askSingletonAgent(true);
+            }
+            else if (AgentType.Text == "Multiagent")
+            {
+                //Ask the question
+                await multiAgent.askSemiDeterministic();
+            }
+            else if (AgentType.Text == "Multiagent with Functions")
+            {
+                //Ask the question
+                await multiAgent.askMultiagent();
+            }
+        }
+
+        public void ClearResponseBox()
+        {
+            //Clear out the response box
+            ResponseBox.Document.Blocks.Clear();
         }
 
         public void UpdateResponseBox(string sender, string response, Color color)

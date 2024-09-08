@@ -1,0 +1,16 @@
+﻿{
+  "name": "AssistantExecuteSqlQuery",
+  "description": "Executes a SQL query on the attached database.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "query": {
+        "type": "string",
+        "description": "The SQL query to execute"
+      }
+    },
+    "required": [
+      "query"
+    ]
+  }
+}
