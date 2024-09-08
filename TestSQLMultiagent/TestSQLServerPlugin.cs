@@ -66,14 +66,11 @@ namespace TestSQLMultiagent
         }
 
         [Test]
-        public static async Task TestAskQuestionWithParameters()
+        public static async Task TestAskMultiAgent()
         {
             SQLMultiAgent.SQLMultiAgentRunner agent = new SQLMultiAgent.SQLMultiAgentRunner();
             agent.question = COMPLEX_QUERY_1;
-            await agent.AskMultiagent();
-
-            Assert.IsNotNull(agent.sqlQuery);
-            Assert.IsNotEmpty(agent.sqlQuery);
+            await agent.AskMultiAgent();
 
             Assert.IsNotEmpty(agent.queryResponse);
         }

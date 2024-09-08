@@ -31,7 +31,7 @@ namespace SQLMultiAgent
         string Context = "AdventureWorks"; 
         public SQLMultiAgentRunner()
         {
-            updatePrompts();
+            UpdatePrompts();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -231,7 +231,7 @@ namespace SQLMultiAgent
         }
 
         //Asks the question using the four agents, including the SQL Assistant, with the SQLServerPlugin as a tool
-        public async Task AskMultiagent()
+        public async Task AskMultiAgent()
         {
             IKernelBuilder builder = Kernel.CreateBuilder();
             Kernel kernel = builder.AddAzureOpenAIChatCompletion(
@@ -305,6 +305,7 @@ namespace SQLMultiAgent
                 string output = $"# {content.Role} - {content.AuthorName ?? "*"}: '{content.Content}'";
                 Console.WriteLine(output);
                 queryResponseWriter.WriteLine(output);
+                EmitResponse(content);
             }
 
             Console.WriteLine($"# IS COMPLETE: {chat.IsComplete}");
@@ -435,7 +436,7 @@ namespace SQLMultiAgent
             EmitResponse("Query Runner", queryResponse);
         }
 
-        public void updatePrompts()
+        public void UpdatePrompts()
         {
             QueryWriterPrompt = $"""
                 You write queries on the {Context} database.

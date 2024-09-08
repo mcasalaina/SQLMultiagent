@@ -70,7 +70,7 @@ namespace SQLMultiAgent
             else if (AgentType.Text == "Multiagent with Functions")
             {
                 //Ask the question
-                await multiAgent.AskMultiagent();
+                await multiAgent.AskMultiAgent();
             }
         }
 
