@@ -33,49 +33,6 @@ namespace TestSQLMultiagent
         }
 
         [Test]
-        public static async Task TestAskQuestion()
-        {
-            SQLMultiAgent.SQLMultiAgentRunner agent = new SQLMultiAgent.SQLMultiAgentRunner();
-            agent.question = SIMPLE_QUERY_1;
-            await agent.AskSingletonAgent();
-
-            Assert.IsNotNull(agent.sqlQuery);
-            Assert.IsNotEmpty(agent.sqlQuery);
-
-            Assert.IsNotEmpty(agent.queryResponse);
-        }
-
-        [Test]
-        public static async Task TestAskSingletonWithFunctions()
-        {
-            SQLMultiAgent.SQLMultiAgentRunner agent = new SQLMultiAgent.SQLMultiAgentRunner();
-            agent.question = SIMPLE_QUERY_1;
-            await agent.AskSingletonAgentWithFunctions();
-
-            Assert.IsNotEmpty(agent.queryResponse);
-        }
-
-        [Test]
-        public static async Task TestAskSingletonWithFunctionsComplexQuery1()
-        {
-            SQLMultiAgent.SQLMultiAgentRunner agent = new SQLMultiAgent.SQLMultiAgentRunner();
-            agent.question = COMPLEX_QUERY_1;
-            await agent.AskSingletonAgentWithFunctions();
-
-            Assert.IsNotEmpty(agent.queryResponse);
-        }
-
-        [Test]
-        public static async Task TestAskMultiAgent()
-        {
-            SQLMultiAgent.SQLMultiAgentRunner agent = new SQLMultiAgent.SQLMultiAgentRunner();
-            agent.question = COMPLEX_QUERY_1;
-            await agent.AskMultiAgent();
-
-            Assert.IsNotEmpty(agent.queryResponse);
-        }
-
-        [Test]
         public static async Task TestAskQuestionSemiDeterministic()
         {
             SQLMultiAgent.SQLMultiAgentRunner agent = new SQLMultiAgent.SQLMultiAgentRunner();

@@ -8,7 +8,7 @@ namespace SQLMultiAgent
     public class SQLServerPlugin
     {
         private string _connectionString;
-        private SQLMultiAgentRunner _multiAgent;
+        private SQLMultiAgentRunner? _multiAgent;
 
         public string ConnectionString
         {
@@ -20,6 +20,11 @@ namespace SQLMultiAgent
         public SQLServerPlugin(SQLMultiAgentRunner multiAgent)
         {
             _multiAgent = multiAgent;
+            _connectionString = "Server=localhost\\SQLEXPRESS;Database=AdventureWorks;Trusted_Connection=True;TrustServerCertificate=True;";
+        }
+
+        public SQLServerPlugin()
+        {
             _connectionString = "Server=localhost\\SQLEXPRESS;Database=AdventureWorks;Trusted_Connection=True;TrustServerCertificate=True;";
         }
 

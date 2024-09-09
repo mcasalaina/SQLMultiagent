@@ -23,7 +23,9 @@ namespace SQLMultiAgent
 {
     public class SQLMultiAgentRunner
     {
+        //The SynchronizationContext is used to send messages to the UI thread - we need it when functions are being called because they run in a different thread
         private SynchronizationContext? context = SynchronizationContext.Current;
+
         public const string SQL_WRITER_ASSISTANT_ID = "asst_nbUQUshgy8xkhlVNJodYwp0w";
         string? DEPLOYMENT_NAME = Environment.GetEnvironmentVariable("AZURE_OPENAI_MODEL_DEPLOYMENT");
         string? ENDPOINT = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
@@ -259,6 +261,8 @@ namespace SQLMultiAgent
                 kernel,
                 provider,
                 SQL_WRITER_ASSISTANT_ID);
+
+            KernelPlugin plugin = KernelPluginFactory.CreateFromObject(new SQLServerPlugin(this));
 
             ChatCompletionAgent queryCheckerAgent =
             new()

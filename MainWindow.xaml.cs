@@ -65,7 +65,7 @@ namespace SQLMultiAgent
             else if (AgentType.Text == "Multiagent")
             {
                 //Ask the question
-                await multiAgent.AskSemiDeterministic();
+                await multiAgent.AskMultiAgent();
             }
             else if (AgentType.Text == "Multiagent with Functions")
             {
