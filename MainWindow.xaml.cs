@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Dynamic;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -35,7 +36,16 @@ namespace SQLMultiAgent
         {
             if (e is AgentRespondedEventArgs args)
             {
-                UpdateResponseBox(args.AgentName, args.Response, Colors.Black);
+                Color color = Colors.Black;
+                if (args.AgentName.Contains("Query"))
+                {
+                    color = Colors.DarkGray;
+                } else if (args.AgentName.Contains("Assistant")) 
+                { 
+                    color = Colors.DarkOliveGreen; 
+                }
+                
+                UpdateResponseBox(args.AgentName, args.Response, color);
             }
         }
         private void QuestionBox_KeyDown(object sender, KeyEventArgs e)

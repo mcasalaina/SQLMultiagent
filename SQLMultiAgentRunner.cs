@@ -16,6 +16,7 @@ using System.Reflection.Metadata;
 using System.Text.Json;
 using System.IO;
 using System.Diagnostics.Eventing.Reader;
+using System.Threading;
 
 #pragma warning disable SKEXP0110, SKEXP0001, SKEXP0050, CS8600, CS8604
 
@@ -256,13 +257,30 @@ namespace SQLMultiAgent
                         .Build();
 
             OpenAIClientProvider provider = OpenAIClientProvider.ForAzureOpenAI(API_KEY, new Uri(ENDPOINT));
-
+            /*
             OpenAIAssistantAgent sqlAssistantAgent = await OpenAIAssistantAgent.RetrieveAsync(
                 kernel,
                 provider,
                 SQL_WRITER_ASSISTANT_ID);
+            */
 
+            // Define the agent
+            OpenAIAssistantAgent sqlAssistantAgent =
+                await OpenAIAssistantAgent.CreateAsync(
+                    kernel: new(),
+                    clientProvider: provider,
+                    new(DEPLOYMENT_NAME)
+                    {
+                        Instructions =
+                            "You are a SQL query generating agent. You generate SQL based on the attached PDF of the AdventureWorks schema." +
+                            "You then run that SQL query using the provided function. You evaluate the results, and regenerate the query and re-run the function" +
+                            "until the query response satisfies the user's request.",
+                        Name = "AdventureWorks SQL Assistant",
+                    });
+
+            // Initialize plugin and add to the agent's Kernel (same as direct Kernel usage).
             KernelPlugin plugin = KernelPluginFactory.CreateFromObject(new SQLServerPlugin(this));
+            sqlAssistantAgent.Kernel.Plugins.Add(plugin);
 
             ChatCompletionAgent queryCheckerAgent =
             new()
@@ -317,12 +335,19 @@ namespace SQLMultiAgent
 
             StringWriter queryResponseWriter = new StringWriter();
 
-            await foreach (ChatMessageContent content in chat.InvokeAsync())
+            try
             {
-                string output = $"# {content.Role} - {content.AuthorName ?? "*"}: '{content.Content}'";
-                Console.WriteLine(output);
-                queryResponseWriter.WriteLine(output);
-                EmitResponse(content);
+                await foreach (ChatMessageContent content in chat.InvokeAsync())
+                {
+                    string output = $"# {content.Role} - {content.AuthorName ?? "*"}: '{content.Content}'";
+                    Console.WriteLine(output);
+                    queryResponseWriter.WriteLine(output);
+                    EmitResponse(content);
+                }
+            }
+            finally
+            {
+                await sqlAssistantAgent.DeleteAsync();
             }
 
             Console.WriteLine($"# IS COMPLETE: {chat.IsComplete}");
