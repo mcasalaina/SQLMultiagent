@@ -52,7 +52,7 @@ namespace SQLMultiAgent
         {
             if (e.Key == Key.Enter)
             {
-                AskButton_Click(sender, e);
+                //AskButton_Click(sender, e);
             }
         }
 
@@ -60,6 +60,8 @@ namespace SQLMultiAgent
         {
             //Clear out the response box
             ClearResponseBox();
+
+            multiAgent.question = QueryBox.Text;
 
             //Store the name of the selected item on AgentType into a variable
             string selectedAgentType = ((ComboBoxItem)AgentType.SelectedItem).Name;

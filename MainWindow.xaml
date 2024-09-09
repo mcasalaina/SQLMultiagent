@@ -27,8 +27,8 @@
         <TextBox x:Name="QueryBox" Text="{Binding question}" KeyDown="QuestionBox_KeyDown" Grid.Column="0" Grid.Row="1" Margin="10" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" TextWrapping="Wrap" TextBlock.FontFamily="Arial" TextBlock.FontSize="16"/>
         <TextBlock Text="Agent Type:" Grid.Column="0" Grid.Row="2" Margin="10,5,10,5" FontFamily="Arial" FontSize="16" FontWeight="Bold"/>
         <ComboBox Name="AgentType" Grid.Column="0" Grid.Row="3" Margin="10" SelectedIndex="0" FontSize="16">
-            <ComboBoxItem x:Name="SingleAgent">Single LLM Call</ComboBoxItem>
-            <ComboBoxItem x:Name="SingleAgentWithFunctions">Single Agent with Functions (Assistant)</ComboBoxItem>
+            <ComboBoxItem x:Name="SingleAgent">Single LLM Call (GPT-4o)</ComboBoxItem>
+            <ComboBoxItem x:Name="SingleAgentWithFunctions">GPT-4o with Assistant Agent</ComboBoxItem>
             <ComboBoxItem x:Name="Multi_Agent">Multi-Agent</ComboBoxItem>
         </ComboBox>
         <Button Content="Ask!" Grid.Column="0" Grid.Row="4" Margin="10" Click="AskButton_Click" FontSize="16" FontWeight="Bold" IsDefault="True"/>
