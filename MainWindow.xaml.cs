@@ -61,26 +61,22 @@ namespace SQLMultiAgent
             //Clear out the response box
             ClearResponseBox();
 
-            //Case statement on AgentType.Text
-      
-            if (AgentType.Text == "Single Agent")
+            //Store the name of the selected item on AgentType into a variable
+            string selectedAgentType = ((ComboBoxItem)AgentType.SelectedItem).Name;
+            
+            switch (selectedAgentType)
             {
-                //Ask the question
-                await multiAgent.AskSingletonAgent();
-            } else if (AgentType.Text == "Single Agent with Functions")
-            {
-                //Ask the question
-                await multiAgent.AskSingletonAgentWithFunctions();
-            }
-            else if (AgentType.Text == "Multiagent")
-            {
-                //Ask the question
-                await multiAgent.AskMultiAgent();
-            }
-            else if (AgentType.Text == "Multiagent with Functions")
-            {
-                //Ask the question
-                await multiAgent.AskMultiAgent();
+                case "SingleAgent":
+                    await multiAgent.AskSingletonAgent();
+                    break;
+                case "SingleAgentWithFunctions":
+                    await multiAgent.AskSingletonAgentWithFunctions();
+                    break;
+                case "Multi_Agent":
+                    await multiAgent.AskMultiAgent();
+                    break;
+                default:
+                    break;
             }
         }
 
